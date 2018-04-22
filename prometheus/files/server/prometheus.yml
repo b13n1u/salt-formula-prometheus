@@ -28,9 +28,101 @@ remote_write:
   {%- if remote_endpoint.get('enabled', True) %}
   # {{ name }}
   - url: {{ remote_endpoint.url }}
+  {%- if remote_endpoint.write_relabel_configs is defined %}
+    write_relabel_configs:
+  {%- for conf in remote_endpoint.write_relabel_configs%}
+      - source_labels: {{conf["source_labels"]}}
+  {%- if 'separator' in conf.keys() %}
+        separator: {{conf['separator']}}
+  {%- endif %}
+  {%- if 'target_label' in conf.keys() %}
+        target_label: {{conf['target_label']}}
+  {%- endif %}
+  {%- if 'regex' in conf.keys() %}
+        regex: {{conf['regex']}}
+  {%- endif %}
+  {%- if 'modulus' in conf.keys() %}
+        modulus: {{conf['modulus']}}
+  {%- endif %}
+  {%- if 'replacement' in conf.keys() %}
+  {%- if conf['replacement'] == '' %}
+        replacement: ''
+  {%- else %}
+        replacement: {{conf['replacement']}}
+  {%- endif %}
+  {%- endif %}
+  {%- if 'action' in conf.keys() %}
+        action: {{conf['action']}}
+  {%- endif %}
+  {%- endfor %}
+  {%- if remote_endpoint.basic_auth is defined %}
+    basic_auth:
+      username: {{remote_endpoint.basic_auth.username}}
+      password: {{remote_endpoint.basic_auth.password}}
+  {%- endif %}
+  {%- if remote_endpoint.bearer_token is defined %}
+    bearer_token: {{remote_endpoint.bearer_token}}
+  {%- endif %}
+  {%- if remote_endpoint.bearer_token_file is defined %}
+    bearer_token_file: {{remote_endpoint.bearer_token_file}}
+  {%- endif %}
+  {%- if remote_endpoint.tls_config is defined %}
+    tls_config:
+      ca_file:   {{remote_endpoint.tls_config.ca_file}}
+      cert_file: {{remote_endpoint.tls_config.cert_file}}
+      key_file:  {{remote_endpoint.tls_config.key_file}}
+      server_name: {{remote_endpoint.tls_config.server_name}}
+      insecure_skip_verify: {{remote_endpoint.tls_config.insecure_skip_verify}}
+  {%- endif %}
+  {%- if remote_endpoint.proxy_url is defined %}
+    proxy_url: {{remote_endpoint.proxy_url}}
+  {%- endif %}
+  {%- endif %}
   {%- endif %}
   {%- endfor %}
 {%- endif %}
+
+{%- if server.get('config', {}).get('remote_read') %}
+remote_read:
+  {%- for name, remote_endpoint in server.config.remote_read.iteritems() %}
+  {%- if remote_endpoint.get('enabled', True) %}
+  # {{ name }}
+  - url: {{ remote_endpoint.url }}
+  {%- if remote_endpoint.required_matchers is defined %}
+    required_matchers: {{remote_endpoint.required_matchers}}
+  {%- endif %}
+  {%- if remote_endpoint.remote_timeout is defined %}
+    remote_timeout: {{remote_endpoint.remote_timeout}}
+  {%- endif %}
+  {%- if remote_endpoint.read_recent is defined %}
+    read_recent: {{remote_endpoint.read_recent}}
+  {%- endif %}
+  {%- if remote_endpoint.basic_auth is defined %}
+    basic_auth:
+      username: {{remote_endpoint.basic_auth.username}}
+      password: {{remote_endpoint.basic_auth.password}}
+  {%- endif %}
+  {%- if remote_endpoint.bearer_token is defined %}
+    bearer_token: {{remote_endpoint.bearer_token}}
+  {%- endif %}
+  {%- if remote_endpoint.bearer_token_file is defined %}
+    bearer_token_file: {{remote_endpoint.bearer_token_file}}
+  {%- endif %}
+  {%- if remote_endpoint.tls_config is defined %}
+    tls_config:
+      ca_file:   {{remote_endpoint.tls_config.ca_file}}
+      cert_file: {{remote_endpoint.tls_config.cert_file}}
+      key_file:  {{remote_endpoint.tls_config.key_file}}
+      server_name: {{remote_endpoint.tls_config.server_name}}
+      insecure_skip_verify: {{remote_endpoint.tls_config.insecure_skip_verify}}
+  {%- endif %}
+  {%- if remote_endpoint.proxy_url is defined %}
+    proxy_url: {{remote_endpoint.proxy_url}}
+  {%- endif %}
+  {%- endif %}
+  {%- endfor %}
+{%- endif %}
+
 
 rule_files:
 - alerts.yml
